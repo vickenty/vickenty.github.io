@@ -8,7 +8,9 @@
 .underline { text-decoration: underline; }
 </style>
 <link rel="stylesheet" href="node_modules/reveal.js/css/reveal.css"/>
+
 <link rel="stylesheet" href="node_modules/reveal.js/css/theme/black.css" id="theme"/>
+
 <link rel="stylesheet" href="talk.css"/>
 
 <!-- If the query includes 'print-pdf', include the PDF print sheet -->
@@ -61,143 +63,15 @@ CLICK THE TIMER
 <h2 id="orgheadline3">Perl extensions</h2>
 <aside class="notes">
 <p>
-interpreter, sharp tool, checks
+interpreter in C, sharp tool, checks
 </p>
 
 </aside>
 </section>
 </section>
 <section>
-<section id="slide-orgheadline8">
-<h2 id="orgheadline8">C is not easy</h2>
-<aside class="notes">
-<p>
-reference example
-</p>
-
-</aside>
-</section>
 <section id="slide-orgheadline4">
-<h3 id="orgheadline4">null pointers</h3>
-<div class="org-src-container">
-
-<pre  class="src src-c"><span style="color: #7CB8BB;">AV</span>* <span style="color: #DFAF8F;">array</span> = get_av(<span style="color: #CC9393;">"array"</span>, 0);
-<span style="color: #7CB8BB;">SV</span>** <span style="color: #DFAF8F;">item</span> = av_fetch(array, 0);
-</pre>
-</div>
-<aside class="notes">
-nil
-</aside>
-</section>
-<section id="slide-orgheadline5">
-<h3 id="orgheadline5">dangling pointers</h3>
-<div class="org-src-container">
-
-<pre  class="src src-c"><span style="color: #7CB8BB;">SV</span>** <span style="color: #DFAF8F;">item</span> = av_fetch(array, 0);
-av_clear(array);
-<span style="color: #7CB8BB;">char</span> *<span style="color: #DFAF8F;">buf</span> = SvPV_nolen(*item);
-</pre>
-</div>
-<aside class="notes">
-<p>
-unlike perl, no refcount
-must track lifetime
-reading from released memory
-</p>
-
-</aside>
-</section>
-<section id="slide-orgheadline6">
-<h3 id="orgheadline6">buffer overflows</h3>
-<div class="org-src-container">
-
-<pre  class="src src-c"><span style="color: #7CB8BB;">char</span> *<span style="color: #DFAF8F;">buf</span> = SvPV_nolen(*item);
-sprintf(buf, <span style="color: #CC9393;">"%d"</span>, rand());
-</pre>
-</div>
-<aside class="notes">
-<p>
-keep track of size of memory
-don't write things you don'w want overwritten
-</p>
-
-</aside>
-</section>
-<section id="slide-orgheadline7">
-<h3 id="orgheadline7">and more</h3>
-<ul>
-<li>uninitialized variables</li>
-<li>sequence points</li>
-<li>integer overflows</li>
-<li>aliasing rules</li>
-<li>data races</li>
-
-</ul>
-<aside class="notes">
-<p>
-15 pages
-</p>
-
-</aside>
-</section>
-</section>
-<section>
-<section id="slide-orgheadline12">
-<h2 id="orgheadline12">Perl XS API is not easy</h2>
-<div class="outline-text-2" id="text-orgheadline12">
-</div></section>
-<section id="slide-orgheadline9">
-<h3 id="orgheadline9">What does this function return?</h3>
-<div class="org-src-container">
-
-<pre  class="src src-c"><span style="color: #7CB8BB;">SSize_t</span> <span style="color: #93E0E3;">av_len</span>(<span style="color: #7CB8BB;">AV</span>* <span style="color: #DFAF8F;">array_ptr</span>);
-</pre>
-</div>
-</section>
-<section id="slide-orgheadline10">
-<h3 id="orgheadline10">reference counting</h3>
-<div class="org-src-container">
-
-<pre  class="src src-c">XPUSHs(av_fetch(array, 0))
-<span style="color: #5F7F5F;">// </span><span style="color: #7F9F7F;">but</span>
-XPUSHs(sv_2mortal(av_delete(array, 0)))
-</pre>
-</div>
-<aside class="notes">
-<p>
-
-</p>
-
-</aside>
-</section>
-<section id="slide-orgheadline11">
-<h3 id="orgheadline11">exceptions</h3>
-<div class="org-src-container">
-
-<pre  class="src src-c"><span style="color: #7CB8BB;">FILE</span> *<span style="color: #DFAF8F;">f</span> = fopen(<span style="color: #CC9393;">"output"</span>, <span style="color: #CC9393;">"w"</span>);
-fprintf(f, <span style="color: #CC9393;">"%d"</span>, SvIV(value));
-fclose(f);
-</pre>
-</div>
-</section>
-</section>
-<section>
-<section id="slide-orgheadline13">
-<h2 id="orgheadline13">Just be careful?</h2>
-<blockquote nil>
-<p>
-We must do better.
-</p>
-</blockquote>
-<p>
-&#x2014; Bjarne Stroustrup, 2015
-</p>
-<small> http://www.stroustrup.com/resource-model.pdf </small>
-</section>
-</section>
-<section>
-<section id="slide-orgheadline14">
-<h2 id="orgheadline14">Rust</h2>
+<h2 id="orgheadline4">Rust</h2>
 <p>
 <a href="http://rust-lang.org/">http://rust-lang.org/</a>
 </p>
@@ -211,10 +85,261 @@ We must do better.
 </section>
 </section>
 <section>
-<section id="slide-orgheadline26">
-<h2 id="orgheadline26">Rust XS</h2>
-<div class="outline-text-2" id="text-orgheadline26">
+<section id="slide-orgheadline19">
+<h2 id="orgheadline19">Rust XS</h2>
+<div class="outline-text-2" id="text-orgheadline19">
 </div></section>
+<section id="slide-orgheadline5">
+<h3 id="orgheadline5">sum array</h3>
+<div class="org-src-container">
+
+<pre  class="src src-rust"><span class="linenr"> 1: </span><span style="color: #94BFF3;">xs!</span> {
+<span class="linenr"> 2: </span>    package <span style="color: #7CB8BB;">Array</span>::<span style="color: #7CB8BB;">Util</span>;
+<span class="linenr"> 3: </span>
+<span class="linenr"> 4: </span>    sub sum_array(ctx, <span style="color: #DFAF8F;">array_ref</span>: <span style="color: #7CB8BB;">SV</span>) {
+<span class="linenr"> 5: </span>
+<span class="linenr"> 6: </span>
+<span class="linenr"> 7: </span>
+<span class="linenr"> 8: </span>
+<span class="linenr"> 9: </span>
+<span class="linenr">10: </span>
+<span class="linenr">11: </span>    }
+<span class="linenr">12: </span>}
+</pre>
+</div>
+<aside class="notes">
+<p>
+skeleton, macros, context, arguments
+</p>
+
+</aside>
+</section>
+<section id="slide-orgheadline6">
+<h3 id="orgheadline6">sum array</h3>
+<div class="org-src-container">
+
+<pre  class="src src-rust"><span class="linenr"> 1: </span><span style="color: #94BFF3;">xs!</span> {
+<span class="linenr"> 2: </span>    package <span style="color: #7CB8BB;">Array</span>::<span style="color: #7CB8BB;">Util</span>;
+<span class="linenr"> 3: </span>
+<span class="linenr"> 4: </span>    sub sum_array(ctx, <span style="color: #DFAF8F;">array_ref</span>: <span style="color: #7CB8BB;">SV</span>) {
+<span class="linenr"> 5: </span>        <span style="color: #F0DFAF; font-weight: bold;">let</span> <span style="color: #F0DFAF; font-weight: bold;">mut</span> sum = 0.0;
+<span class="linenr"> 6: </span>
+<span class="linenr"> 7: </span>
+<span class="linenr"> 8: </span>
+<span class="linenr"> 9: </span>
+<span class="linenr">10: </span>        <span style="color: #94BFF3;">xs_return!</span>(ctx, sum);
+<span class="linenr">11: </span>    }
+<span class="linenr">12: </span>}
+</pre>
+</div>
+<aside class="notes">
+<p>
+let keyword, floating point, return value
+</p>
+
+</aside>
+</section>
+<section id="slide-orgheadline7">
+<h3 id="orgheadline7">sum array</h3>
+<div class="org-src-container">
+
+<pre  class="src src-rust"><span class="linenr"> 1: </span><span style="color: #94BFF3;">xs!</span> {
+<span class="linenr"> 2: </span>    package <span style="color: #7CB8BB;">Array</span>::<span style="color: #7CB8BB;">Util</span>;
+<span class="linenr"> 3: </span>
+<span class="linenr"> 4: </span>    sub sum_array(ctx, <span style="color: #DFAF8F;">array_ref</span>: <span style="color: #7CB8BB;">SV</span>) {
+<span class="linenr"> 5: </span>        <span style="color: #F0DFAF; font-weight: bold;">let</span> <span style="color: #F0DFAF; font-weight: bold;">mut</span> sum = 0.0;
+<span class="linenr"> 6: </span>        <span style="color: #F0DFAF; font-weight: bold;">let</span> <span style="color: #DFAF8F;">array</span>: <span style="color: #7CB8BB;">AV</span> = array_ref.deref_av();
+<span class="linenr"> 7: </span>
+<span class="linenr"> 8: </span>
+<span class="linenr"> 9: </span>
+<span class="linenr">10: </span>        <span style="color: #94BFF3;">xs_return!</span>(ctx, sum);
+<span class="linenr">11: </span>    }
+<span class="linenr">12: </span>}
+</pre>
+</div>
+<aside class="notes">
+<p>
+dereference, NULL, Option
+</p>
+
+</aside>
+</section>
+<section id="slide-orgheadline8">
+<h3 id="orgheadline8">sum array</h3>
+<div class="org-src-container">
+
+<pre  class="src src-rust"><span class="linenr"> 1: </span><span style="color: #94BFF3;">xs!</span> {
+<span class="linenr"> 2: </span>    package <span style="color: #7CB8BB;">Array</span>::<span style="color: #7CB8BB;">Util</span>;
+<span class="linenr"> 3: </span>
+<span class="linenr"> 4: </span>    sub sum_array(ctx, <span style="color: #DFAF8F;">array_ref</span>: <span style="color: #7CB8BB;">SV</span>) {
+<span class="linenr"> 5: </span>        <span style="color: #F0DFAF; font-weight: bold;">let</span> <span style="color: #F0DFAF; font-weight: bold;">mut</span> sum = 0.0;
+<span class="linenr"> 6: </span>        <span style="color: #F0DFAF; font-weight: bold;">let</span> <span style="color: #DFAF8F;">array</span>: <span style="color: #7CB8BB;">AV</span> = array_ref.deref_av();
+<span class="linenr"> 7: </span>        <span style="color: #5F7F5F;">// </span><span style="color: #7F9F7F;">ERROR: AV expected, but have Option&lt;AV&gt;</span>
+<span class="linenr"> 8: </span>
+<span class="linenr"> 9: </span>
+<span class="linenr">10: </span>        <span style="color: #94BFF3;">xs_return!</span>(ctx, sum);
+<span class="linenr">11: </span>    }
+<span class="linenr">12: </span>}
+</pre>
+</div>
+<aside class="notes">
+<p>
+does not compile, deref<sub>av</sub> returns an option
+</p>
+
+</aside>
+</section>
+<section id="slide-orgheadline9">
+<h3 id="orgheadline9">sum array</h3>
+<div class="org-src-container">
+
+<pre  class="src src-rust"><span class="linenr"> 1: </span><span style="color: #94BFF3;">xs!</span> {
+<span class="linenr"> 2: </span>    package <span style="color: #7CB8BB;">Array</span>::<span style="color: #7CB8BB;">Util</span>;
+<span class="linenr"> 3: </span>
+<span class="linenr"> 4: </span>    sub sum_array(ctx, <span style="color: #DFAF8F;">array_ref</span>: <span style="color: #7CB8BB;">SV</span>) {
+<span class="linenr"> 5: </span>        <span style="color: #F0DFAF; font-weight: bold;">let</span> <span style="color: #F0DFAF; font-weight: bold;">mut</span> sum = 0.0;
+<span class="linenr"> 6: </span>        <span style="color: #F0DFAF; font-weight: bold;">let</span> <span style="color: #DFAF8F;">array_opt</span>: <span style="color: #7CB8BB;">Option</span>&lt;<span style="color: #7CB8BB;">AV</span>&gt; = array_ref.deref_av();
+<span class="linenr"> 7: </span>
+<span class="linenr"> 8: </span>
+<span class="linenr"> 9: </span>
+<span class="linenr">10: </span>        <span style="color: #94BFF3;">xs_return!</span>(ctx, sum);
+<span class="linenr">11: </span>    }
+<span class="linenr">12: </span>}
+</pre>
+</div>
+<aside class="notes">
+<p>
+expect is 'or die' in perl
+</p>
+
+</aside>
+
+</section>
+<section id="slide-orgheadline10">
+<h3 id="orgheadline10">sum array</h3>
+<div class="org-src-container">
+
+<pre  class="src src-rust"><span class="linenr"> 1: </span><span style="color: #94BFF3;">xs!</span> {
+<span class="linenr"> 2: </span>    package <span style="color: #7CB8BB;">Array</span>::<span style="color: #7CB8BB;">Util</span>;
+<span class="linenr"> 3: </span>
+<span class="linenr"> 4: </span>    sub sum_array(ctx, <span style="color: #DFAF8F;">array_ref</span>: <span style="color: #7CB8BB;">SV</span>) {
+<span class="linenr"> 5: </span>        <span style="color: #F0DFAF; font-weight: bold;">let</span> <span style="color: #F0DFAF; font-weight: bold;">mut</span> sum = 0.0;
+<span class="linenr"> 6: </span>        <span style="color: #F0DFAF; font-weight: bold;">let</span> <span style="color: #DFAF8F;">array_opt</span>: <span style="color: #7CB8BB;">Option</span>&lt;<span style="color: #7CB8BB;">AV</span>&gt; = array_ref.deref_av();
+<span class="linenr"> 7: </span>        <span style="color: #F0DFAF; font-weight: bold;">let</span> <span style="color: #DFAF8F;">array</span>: <span style="color: #7CB8BB;">AV</span> = array_opt
+<span class="linenr"> 8: </span>
+<span class="linenr"> 9: </span>
+<span class="linenr">10: </span>        <span style="color: #94BFF3;">xs_return!</span>(ctx, sum);
+<span class="linenr">11: </span>    }
+<span class="linenr">12: </span>}
+</pre>
+</div>
+<aside class="notes">
+<p>
+to go from option to av we need an extra step
+</p>
+
+</aside>
+</section>
+<section id="slide-orgheadline11">
+<h3 id="orgheadline11">sum array</h3>
+<div class="org-src-container">
+
+<pre  class="src src-rust"><span class="linenr"> 1: </span><span style="color: #94BFF3;">xs!</span> {
+<span class="linenr"> 2: </span>    package <span style="color: #7CB8BB;">Array</span>::<span style="color: #7CB8BB;">Util</span>;
+<span class="linenr"> 3: </span>
+<span class="linenr"> 4: </span>    sub sum_array(ctx, <span style="color: #DFAF8F;">array_ref</span>: <span style="color: #7CB8BB;">SV</span>) {
+<span class="linenr"> 5: </span>        <span style="color: #F0DFAF; font-weight: bold;">let</span> <span style="color: #F0DFAF; font-weight: bold;">mut</span> sum = 0.0;
+<span class="linenr"> 6: </span>        <span style="color: #F0DFAF; font-weight: bold;">let</span> <span style="color: #DFAF8F;">array_opt</span>: <span style="color: #7CB8BB;">Option</span>&lt;<span style="color: #7CB8BB;">AV</span>&gt; = array_ref.deref_av();
+<span class="linenr"> 7: </span>        <span style="color: #F0DFAF; font-weight: bold;">let</span> <span style="color: #DFAF8F;">array</span>: <span style="color: #7CB8BB;">AV</span> = array_opt.expect(<span style="color: #CC9393;">"an array reference"</span>);
+<span class="linenr"> 8: </span>
+<span class="linenr"> 9: </span>
+<span class="linenr">10: </span>        <span style="color: #94BFF3;">xs_return!</span>(ctx, sum);
+<span class="linenr">11: </span>    }
+<span class="linenr">12: </span>}
+</pre>
+</div>
+<aside class="notes">
+<p>
+or die idiom
+</p>
+
+</aside>
+</section>
+<section id="slide-orgheadline12">
+<h3 id="orgheadline12">sum array</h3>
+<div class="org-src-container">
+
+<pre  class="src src-rust"><span class="linenr"> 1: </span><span style="color: #94BFF3;">xs!</span> {
+<span class="linenr"> 2: </span>    package <span style="color: #7CB8BB;">Array</span>::<span style="color: #7CB8BB;">Util</span>;
+<span class="linenr"> 3: </span>
+<span class="linenr"> 4: </span>    sub sum_array(ctx, <span style="color: #DFAF8F;">array_ref</span>: <span style="color: #7CB8BB;">SV</span>) {
+<span class="linenr"> 5: </span>        <span style="color: #F0DFAF; font-weight: bold;">let</span> <span style="color: #F0DFAF; font-weight: bold;">mut</span> sum = 0.0;
+<span class="linenr"> 6: </span>        <span style="color: #F0DFAF; font-weight: bold;">let</span> array = array_ref.deref_av().expect(<span style="color: #CC9393;">"an array reference"</span>);
+<span class="linenr"> 7: </span>
+<span class="linenr"> 8: </span>
+<span class="linenr"> 9: </span>
+<span class="linenr">10: </span>        <span style="color: #94BFF3;">xs_return!</span>(ctx, sum);
+<span class="linenr">11: </span>    }
+<span class="linenr">12: </span>}
+</pre>
+</div>
+<aside class="notes">
+<p>
+on one line, without type
+</p>
+
+</aside>
+</section>
+<section id="slide-orgheadline13">
+<h3 id="orgheadline13">sum array</h3>
+<div class="org-src-container">
+
+<pre  class="src src-rust"><span class="linenr"> 1: </span><span style="color: #94BFF3;">xs!</span> {
+<span class="linenr"> 2: </span>    package <span style="color: #7CB8BB;">Array</span>::<span style="color: #7CB8BB;">Util</span>;
+<span class="linenr"> 3: </span>
+<span class="linenr"> 4: </span>    sub sum_array(ctx, <span style="color: #DFAF8F;">array_ref</span>: <span style="color: #7CB8BB;">SV</span>) {
+<span class="linenr"> 5: </span>        <span style="color: #F0DFAF; font-weight: bold;">let</span> <span style="color: #F0DFAF; font-weight: bold;">mut</span> sum = 0.0;
+<span class="linenr"> 6: </span>        <span style="color: #F0DFAF; font-weight: bold;">let</span> array = array_ref.deref_av().expect(<span style="color: #CC9393;">"an array reference"</span>);
+<span class="linenr"> 7: </span>        <span style="color: #F0DFAF; font-weight: bold;">for</span> index <span style="color: #F0DFAF; font-weight: bold;">in</span> 0...array.top_index() {
+<span class="linenr"> 8: </span>
+<span class="linenr"> 9: </span>        }
+<span class="linenr">10: </span>        <span style="color: #94BFF3;">xs_return!</span>(ctx, sum);
+<span class="linenr">11: </span>    }
+<span class="linenr">12: </span>}
+</pre>
+</div>
+<aside class="notes">
+<p>
+set up the loop
+</p>
+
+</aside>
+</section>
+<section id="slide-orgheadline14">
+<h3 id="orgheadline14">sum array</h3>
+<div class="org-src-container">
+
+<pre  class="src src-rust"><span class="linenr"> 1: </span><span style="color: #94BFF3;">xs!</span> {
+<span class="linenr"> 2: </span>    package <span style="color: #7CB8BB;">Array</span>::<span style="color: #7CB8BB;">Util</span>;
+<span class="linenr"> 3: </span>
+<span class="linenr"> 4: </span>    sub sum_array(ctx, <span style="color: #DFAF8F;">array_ref</span>: <span style="color: #7CB8BB;">SV</span>) {
+<span class="linenr"> 5: </span>        <span style="color: #F0DFAF; font-weight: bold;">let</span> <span style="color: #F0DFAF; font-weight: bold;">mut</span> sum = 0.0;
+<span class="linenr"> 6: </span>        <span style="color: #F0DFAF; font-weight: bold;">let</span> array = array_ref.deref_av().expect(<span style="color: #CC9393;">"an array reference"</span>);
+<span class="linenr"> 7: </span>        <span style="color: #F0DFAF; font-weight: bold;">for</span> index <span style="color: #F0DFAF; font-weight: bold;">in</span> 0...array.top_index() {
+<span class="linenr"> 8: </span>            sum += array.fetch(index);
+<span class="linenr"> 9: </span>        }
+<span class="linenr">10: </span>        <span style="color: #94BFF3;">xs_return!</span>(ctx, sum);
+<span class="linenr">11: </span>    }
+<span class="linenr">12: </span>}
+</pre>
+</div>
+<aside class="notes">
+<p>
+get an element, add it to sum
+</p>
+
+</aside>
+</section>
 <section id="slide-orgheadline15">
 <h3 id="orgheadline15">sum array</h3>
 <div class="org-src-container">
@@ -222,23 +347,20 @@ We must do better.
 <pre  class="src src-rust"><span class="linenr"> 1: </span><span style="color: #94BFF3;">xs!</span> {
 <span class="linenr"> 2: </span>    package <span style="color: #7CB8BB;">Array</span>::<span style="color: #7CB8BB;">Util</span>;
 <span class="linenr"> 3: </span>
-<span class="linenr"> 4: </span>    sub sum_array(ctx) {
-<span class="linenr"> 5: </span>
-<span class="linenr"> 6: </span>
-<span class="linenr"> 7: </span>
-<span class="linenr"> 8: </span>
-<span class="linenr"> 9: </span>
-<span class="linenr">10: </span>
-<span class="linenr">11: </span>
-<span class="linenr">12: </span>
-<span class="linenr">13: </span>        <span style="color: #94BFF3;">xs_return!</span>(ctx, 0.0);
-<span class="linenr">14: </span>    }
-<span class="linenr">15: </span>}
+<span class="linenr"> 4: </span>    sub sum_array(ctx, <span style="color: #DFAF8F;">array_ref</span>: <span style="color: #7CB8BB;">SV</span>) {
+<span class="linenr"> 5: </span>        <span style="color: #F0DFAF; font-weight: bold;">let</span> <span style="color: #F0DFAF; font-weight: bold;">mut</span> sum = 0.0;
+<span class="linenr"> 6: </span>        <span style="color: #F0DFAF; font-weight: bold;">let</span> array = array_ref.deref_av().expect(<span style="color: #CC9393;">"an array reference"</span>);
+<span class="linenr"> 7: </span>        <span style="color: #F0DFAF; font-weight: bold;">for</span> index <span style="color: #F0DFAF; font-weight: bold;">in</span> 0...array.top_index() {
+<span class="linenr"> 8: </span>            sum += array.fetch(index); <span style="color: #5F7F5F;">// </span><span style="color: #7F9F7F;">ERROR: '+= Option' is not</span>
+<span class="linenr"> 9: </span>        }                              <span style="color: #5F7F5F;">//        </span><span style="color: #7F9F7F;">implemented for float</span>
+<span class="linenr">10: </span>        <span style="color: #94BFF3;">xs_return!</span>(ctx, sum);
+<span class="linenr">11: </span>    }
+<span class="linenr">12: </span>}
 </pre>
 </div>
 <aside class="notes">
 <p>
-skeleton, macros, context
+arrays have holes, Option again
 </p>
 
 </aside>
@@ -250,23 +372,20 @@ skeleton, macros, context
 <pre  class="src src-rust"><span class="linenr"> 1: </span><span style="color: #94BFF3;">xs!</span> {
 <span class="linenr"> 2: </span>    package <span style="color: #7CB8BB;">Array</span>::<span style="color: #7CB8BB;">Util</span>;
 <span class="linenr"> 3: </span>
-<span class="linenr"> 4: </span>    sub sum_array(ctx) {
-<span class="linenr"> 5: </span>        <span style="color: #F0DFAF; font-weight: bold;">let</span> <span style="color: #DFAF8F;">param</span>: <span style="color: #7CB8BB;">SV</span> = ctx.st_fetch(0);
-<span class="linenr"> 6: </span>
-<span class="linenr"> 7: </span>
-<span class="linenr"> 8: </span>
-<span class="linenr"> 9: </span>
-<span class="linenr">10: </span>
-<span class="linenr">11: </span>
-<span class="linenr">12: </span>
-<span class="linenr">13: </span>        <span style="color: #94BFF3;">xs_return!</span>(ctx, 0.0);
-<span class="linenr">14: </span>    }
-<span class="linenr">15: </span>}
+<span class="linenr"> 4: </span>    sub sum_array(ctx, <span style="color: #DFAF8F;">array_ref</span>: <span style="color: #7CB8BB;">SV</span>) {
+<span class="linenr"> 5: </span>        <span style="color: #F0DFAF; font-weight: bold;">let</span> <span style="color: #F0DFAF; font-weight: bold;">mut</span> sum = 0.0;
+<span class="linenr"> 6: </span>        <span style="color: #F0DFAF; font-weight: bold;">let</span> array = array_ref.deref_av().expect(<span style="color: #CC9393;">"an array reference"</span>);
+<span class="linenr"> 7: </span>        <span style="color: #F0DFAF; font-weight: bold;">for</span> index <span style="color: #F0DFAF; font-weight: bold;">in</span> 0...array.top_index() {
+<span class="linenr"> 8: </span>            sum += array.fetch(index).unwrap_or(0.0);
+<span class="linenr"> 9: </span>        }
+<span class="linenr">10: </span>        <span style="color: #94BFF3;">xs_return!</span>(ctx, sum);
+<span class="linenr">11: </span>    }
+<span class="linenr">12: </span>}
 </pre>
 </div>
 <aside class="notes">
 <p>
-get element, same names, no pointers, reference counts
+unwrap<sub>or</sub> is similar to the 'defined or' operator, will replace missing values with the default
 </p>
 
 </aside>
@@ -278,23 +397,20 @@ get element, same names, no pointers, reference counts
 <pre  class="src src-rust"><span class="linenr"> 1: </span><span style="color: #94BFF3;">xs!</span> {
 <span class="linenr"> 2: </span>    package <span style="color: #7CB8BB;">Array</span>::<span style="color: #7CB8BB;">Util</span>;
 <span class="linenr"> 3: </span>
-<span class="linenr"> 4: </span>    sub sum_array(ctx) {
-<span class="linenr"> 5: </span>        <span style="color: #F0DFAF; font-weight: bold;">let</span> <span style="color: #DFAF8F;">param</span>: <span style="color: #7CB8BB;">SV</span> = ctx.st_fetch(0);
-<span class="linenr"> 6: </span>        <span style="color: #F0DFAF; font-weight: bold;">let</span> <span style="color: #DFAF8F;">array</span>: <span style="color: #7CB8BB;">AV</span> = param.deref_av();
-<span class="linenr"> 7: </span>
-<span class="linenr"> 8: </span>
-<span class="linenr"> 9: </span>
-<span class="linenr">10: </span>
-<span class="linenr">11: </span>
-<span class="linenr">12: </span>
-<span class="linenr">13: </span>        <span style="color: #94BFF3;">xs_return!</span>(ctx, 0.0);
-<span class="linenr">14: </span>    }
-<span class="linenr">15: </span>}
+<span class="linenr"> 4: </span>    sub sum_array(ctx, <span style="color: #DFAF8F;">array</span>: <span style="color: #7CB8BB;">AV</span>) {
+<span class="linenr"> 5: </span>        <span style="color: #F0DFAF; font-weight: bold;">let</span> <span style="color: #F0DFAF; font-weight: bold;">mut</span> sum = 0.0;
+<span class="linenr"> 6: </span>
+<span class="linenr"> 7: </span>        <span style="color: #F0DFAF; font-weight: bold;">for</span> index <span style="color: #F0DFAF; font-weight: bold;">in</span> 0...array.top_index() {
+<span class="linenr"> 8: </span>            sum += array.fetch(index).unwrap_or(0.0);
+<span class="linenr"> 9: </span>        }
+<span class="linenr">10: </span>        <span style="color: #94BFF3;">xs_return!</span>(ctx, sum);
+<span class="linenr">11: </span>    }
+<span class="linenr">12: </span>}
 </pre>
 </div>
 <aside class="notes">
 <p>
-get array, not a reference, option
+automatic argument conversion
 </p>
 
 </aside>
@@ -306,221 +422,28 @@ get array, not a reference, option
 <pre  class="src src-rust"><span class="linenr"> 1: </span><span style="color: #94BFF3;">xs!</span> {
 <span class="linenr"> 2: </span>    package <span style="color: #7CB8BB;">Array</span>::<span style="color: #7CB8BB;">Util</span>;
 <span class="linenr"> 3: </span>
-<span class="linenr"> 4: </span>    sub sum_array(ctx) {
-<span class="linenr"> 5: </span>        <span style="color: #F0DFAF; font-weight: bold;">let</span> <span style="color: #DFAF8F;">param</span>: <span style="color: #7CB8BB;">SV</span> = ctx.st_fetch(0);
-<span class="linenr"> 6: </span>        <span style="color: #F0DFAF; font-weight: bold;">let</span> <span style="color: #DFAF8F;">array</span>: <span style="color: #7CB8BB;">AV</span> = param.deref_av(); 
-<span class="linenr"> 7: </span>        <span style="color: #5F7F5F;">//   </span><span style="color: #7F9F7F;">ERROR: AV expected, but have Option&lt;AV&gt;</span>
+<span class="linenr"> 4: </span>    sub sum_array(ctx, <span style="color: #DFAF8F;">array</span>: <span style="color: #7CB8BB;">AV</span>) {
+<span class="linenr"> 5: </span>        <span style="color: #F0DFAF; font-weight: bold;">let</span> <span style="color: #DFAF8F;">sum</span>: <span style="color: #7CB8BB;">NV</span> = array.iter()
+<span class="linenr"> 6: </span>            .map(|value| value.unwrap_or(0.0))
+<span class="linenr"> 7: </span>            .sum();
 <span class="linenr"> 8: </span>
 <span class="linenr"> 9: </span>
-<span class="linenr">10: </span>
-<span class="linenr">11: </span>
-<span class="linenr">12: </span>
-<span class="linenr">13: </span>        <span style="color: #94BFF3;">xs_return!</span>(ctx, 0.0);
-<span class="linenr">14: </span>    }
-<span class="linenr">15: </span>}
+<span class="linenr">10: </span>        <span style="color: #94BFF3;">xs_return!</span>(ctx, sum);
+<span class="linenr">11: </span>    }
+<span class="linenr">12: </span>}
 </pre>
 </div>
 <aside class="notes">
 <p>
-does not compile, need to check
+or use the itration tools from the standard library
 </p>
 
 </aside>
-</section>
-<section id="slide-orgheadline19">
-<h3 id="orgheadline19">sum array</h3>
-<div class="org-src-container">
-
-<pre  class="src src-rust"><span class="linenr"> 1: </span><span style="color: #94BFF3;">xs!</span> {
-<span class="linenr"> 2: </span>    package <span style="color: #7CB8BB;">Array</span>::<span style="color: #7CB8BB;">Util</span>;
-<span class="linenr"> 3: </span>
-<span class="linenr"> 4: </span>    sub sum_array(ctx) {
-<span class="linenr"> 5: </span>        <span style="color: #F0DFAF; font-weight: bold;">let</span> <span style="color: #DFAF8F;">param</span>: <span style="color: #7CB8BB;">SV</span> = ctx.st_fetch(0);
-<span class="linenr"> 6: </span>        <span style="color: #F0DFAF; font-weight: bold;">let</span> <span style="color: #DFAF8F;">array</span>: <span style="color: #7CB8BB;">AV</span> = param.deref_av().expect(<span style="color: #CC9393;">"not an array ref"</span>);
-<span class="linenr"> 7: </span>
-<span class="linenr"> 8: </span>
-<span class="linenr"> 9: </span>
-<span class="linenr">10: </span>
-<span class="linenr">11: </span>
-<span class="linenr">12: </span>
-<span class="linenr">13: </span>        <span style="color: #94BFF3;">xs_return!</span>(ctx, 0.0);
-<span class="linenr">14: </span>    }
-<span class="linenr">15: </span>}
-</pre>
-</div>
-<aside class="notes">
-<p>
-common or die idiom
-</p>
-
-</aside>
-</section>
-<section id="slide-orgheadline20">
-<h3 id="orgheadline20">sum array</h3>
-<div class="org-src-container">
-
-<pre  class="src src-rust"><span class="linenr"> 1: </span><span style="color: #94BFF3;">xs!</span> {
-<span class="linenr"> 2: </span>    package <span style="color: #7CB8BB;">Array</span>::<span style="color: #7CB8BB;">Util</span>;
-<span class="linenr"> 3: </span>
-<span class="linenr"> 4: </span>    sub sum_array(ctx) {
-<span class="linenr"> 5: </span>        <span style="color: #F0DFAF; font-weight: bold;">let</span> <span style="color: #DFAF8F;">param</span>: <span style="color: #7CB8BB;">SV</span> = ctx.st_fetch(0);
-<span class="linenr"> 6: </span>        <span style="color: #F0DFAF; font-weight: bold;">let</span> <span style="color: #DFAF8F;">array</span>: <span style="color: #7CB8BB;">AV</span> = param.deref_av().expect(<span style="color: #CC9393;">"not an array ref"</span>);
-<span class="linenr"> 7: </span>        <span style="color: #F0DFAF; font-weight: bold;">let</span> <span style="color: #F0DFAF; font-weight: bold;">mut</span> sum = 0.0;
-<span class="linenr"> 8: </span>        <span style="color: #F0DFAF; font-weight: bold;">for</span> index <span style="color: #F0DFAF; font-weight: bold;">in</span> 0..array.top_index() + 1 {
-<span class="linenr"> 9: </span>
-<span class="linenr">10: </span>
-<span class="linenr">11: </span>
-<span class="linenr">12: </span>        }
-<span class="linenr">13: </span>        <span style="color: #94BFF3;">xs_return!</span>(ctx, sum);
-<span class="linenr">14: </span>    }
-<span class="linenr">15: </span>}
-</pre>
-</div>
-<aside class="notes">
-<p>
-type inference
-</p>
-
-</aside>
-</section>
-<section id="slide-orgheadline21">
-<h3 id="orgheadline21">sum array</h3>
-<div class="org-src-container">
-
-<pre  class="src src-rust"><span class="linenr"> 1: </span><span style="color: #94BFF3;">xs!</span> {
-<span class="linenr"> 2: </span>    package <span style="color: #7CB8BB;">Array</span>::<span style="color: #7CB8BB;">Util</span>;
-<span class="linenr"> 3: </span>
-<span class="linenr"> 4: </span>    sub sum_array(ctx) {
-<span class="linenr"> 5: </span>        <span style="color: #F0DFAF; font-weight: bold;">let</span> <span style="color: #DFAF8F;">param</span>: <span style="color: #7CB8BB;">SV</span> = ctx.st_fetch(0);
-<span class="linenr"> 6: </span>        <span style="color: #F0DFAF; font-weight: bold;">let</span> <span style="color: #DFAF8F;">array</span>: <span style="color: #7CB8BB;">AV</span> = param.deref_av().expect(<span style="color: #CC9393;">"not an array ref"</span>);
-<span class="linenr"> 7: </span>        <span style="color: #F0DFAF; font-weight: bold;">let</span> <span style="color: #F0DFAF; font-weight: bold;">mut</span> sum = 0.0;
-<span class="linenr"> 8: </span>        <span style="color: #F0DFAF; font-weight: bold;">for</span> index <span style="color: #F0DFAF; font-weight: bold;">in</span> 0..array.top_index() + 1 {
-<span class="linenr"> 9: </span>            <span style="color: #F0DFAF; font-weight: bold;">if</span> <span style="color: #F0DFAF; font-weight: bold;">let</span> <span style="color: #7CB8BB;">Some</span>(item) = array.fetch(index) {
-<span class="linenr">10: </span>                sum += item;
-<span class="linenr">11: </span>            }
-<span class="linenr">12: </span>        }
-<span class="linenr">13: </span>        <span style="color: #94BFF3;">xs_return!</span>(ctx, sum);
-<span class="linenr">14: </span>    }
-<span class="linenr">15: </span>}
-</pre>
-</div>
-<aside class="notes">
-<p>
-option again, common if my idiom, type conversions
-</p>
-
-</aside>
-</section>
-<section id="slide-orgheadline22">
-<h3 id="orgheadline22">sum array, take 2</h3>
-<div class="org-src-container">
-
-<pre  class="src src-rust"><span class="linenr"> 1: </span><span style="color: #94BFF3;">xs!</span> {
-<span class="linenr"> 2: </span>    package <span style="color: #7CB8BB;">Array</span>::<span style="color: #7CB8BB;">Util</span>;
-<span class="linenr"> 3: </span>
-<span class="linenr"> 4: </span>    sub sum_array(ctx) {
-<span class="linenr"> 5: </span>        <span style="color: #F0DFAF; font-weight: bold;">let</span> <span style="color: #DFAF8F;">param</span>: <span style="color: #7CB8BB;">SV</span> = ctx.st_fetch(0);
-<span class="linenr"> 6: </span>        <span style="color: #F0DFAF; font-weight: bold;">let</span> <span style="color: #DFAF8F;">array</span>: <span style="color: #7CB8BB;">AV</span> = param.deref_av().expect(<span style="color: #CC9393;">"not an array ref"</span>);
-<span class="linenr"> 7: </span>        <span style="color: #F0DFAF; font-weight: bold;">let</span> <span style="color: #DFAF8F;">sum</span>: <span style="color: #7CB8BB;">NV</span> = 
-<span class="linenr"> 8: </span>
-<span class="linenr"> 9: </span>
-<span class="linenr">10: </span>
-<span class="linenr">11: </span>
-<span class="linenr">12: </span>
-<span class="linenr">13: </span>        <span style="color: #94BFF3;">xs_return!</span>(ctx, sum);
-<span class="linenr">14: </span>    }
-<span class="linenr">15: </span>}
-</pre>
-</div>
-<aside class="notes">
-<p>
-rewind
-</p>
-
-</aside>
-</section>
-<section id="slide-orgheadline23">
-<h3 id="orgheadline23">sum array, take 2</h3>
-<div class="org-src-container">
-
-<pre  class="src src-rust"><span class="linenr"> 1: </span><span style="color: #94BFF3;">xs!</span> {
-<span class="linenr"> 2: </span>    package <span style="color: #7CB8BB;">Array</span>::<span style="color: #7CB8BB;">Util</span>;
-<span class="linenr"> 3: </span>
-<span class="linenr"> 4: </span>    sub sum_array(ctx) {
-<span class="linenr"> 5: </span>        <span style="color: #F0DFAF; font-weight: bold;">let</span> <span style="color: #DFAF8F;">param</span>: <span style="color: #7CB8BB;">SV</span> = ctx.st_fetch(0);
-<span class="linenr"> 6: </span>        <span style="color: #F0DFAF; font-weight: bold;">let</span> <span style="color: #DFAF8F;">array</span>: <span style="color: #7CB8BB;">AV</span> = param.deref_av().expect(<span style="color: #CC9393;">"not an array ref"</span>);
-<span class="linenr"> 7: </span>        <span style="color: #F0DFAF; font-weight: bold;">let</span> <span style="color: #DFAF8F;">sum</span>: <span style="color: #7CB8BB;">NV</span> = array.iter()
-<span class="linenr"> 8: </span>
-<span class="linenr"> 9: </span>
-<span class="linenr">10: </span>
-<span class="linenr">11: </span>
-<span class="linenr">12: </span>
-<span class="linenr">13: </span>        <span style="color: #94BFF3;">xs_return!</span>(ctx, sum);
-<span class="linenr">14: </span>    }
-<span class="linenr">15: </span>}
-</pre>
-</div>
-<aside class="notes">
-<p>
-iterator
-</p>
-
-</aside>
-</section>
-<section id="slide-orgheadline24">
-<h3 id="orgheadline24">sum array, take 2</h3>
-<div class="org-src-container">
-
-<pre  class="src src-rust"><span class="linenr"> 1: </span><span style="color: #94BFF3;">xs!</span> {
-<span class="linenr"> 2: </span>    package <span style="color: #7CB8BB;">Array</span>::<span style="color: #7CB8BB;">Util</span>;
-<span class="linenr"> 3: </span>
-<span class="linenr"> 4: </span>    sub sum_array(ctx) {
-<span class="linenr"> 5: </span>        <span style="color: #F0DFAF; font-weight: bold;">let</span> <span style="color: #DFAF8F;">param</span>: <span style="color: #7CB8BB;">SV</span> = ctx.st_fetch(0);
-<span class="linenr"> 6: </span>        <span style="color: #F0DFAF; font-weight: bold;">let</span> <span style="color: #DFAF8F;">array</span>: <span style="color: #7CB8BB;">AV</span> = param.deref_av().expect(<span style="color: #CC9393;">"not an array ref"</span>);
-<span class="linenr"> 7: </span>        <span style="color: #F0DFAF; font-weight: bold;">let</span> <span style="color: #DFAF8F;">sum</span>: <span style="color: #7CB8BB;">NV</span> = array.iter()
-<span class="linenr"> 8: </span>            .map(|v| v.unwrap_or(0.0))
-<span class="linenr"> 9: </span>
-<span class="linenr">10: </span>
-<span class="linenr">11: </span>
-<span class="linenr">12: </span>
-<span class="linenr">13: </span>        <span style="color: #94BFF3;">xs_return!</span>(ctx, sum);
-<span class="linenr">14: </span>    }
-<span class="linenr">15: </span>}
-</pre>
-</div>
-<aside class="notes">
-<p>
-map, code block, unwrap<sub>or</sub> == '//'
-</p>
-
-</aside>
-</section>
-<section id="slide-orgheadline25">
-<h3 id="orgheadline25">sum array, take 2</h3>
-<div class="org-src-container">
-
-<pre  class="src src-rust"><span class="linenr"> 1: </span><span style="color: #94BFF3;">xs!</span> {
-<span class="linenr"> 2: </span>    package <span style="color: #7CB8BB;">Array</span>::<span style="color: #7CB8BB;">Util</span>;
-<span class="linenr"> 3: </span>
-<span class="linenr"> 4: </span>    sub sum_array(ctx) {
-<span class="linenr"> 5: </span>        <span style="color: #F0DFAF; font-weight: bold;">let</span> <span style="color: #DFAF8F;">param</span>: <span style="color: #7CB8BB;">SV</span> = ctx.st_fetch(0);
-<span class="linenr"> 6: </span>        <span style="color: #F0DFAF; font-weight: bold;">let</span> <span style="color: #DFAF8F;">array</span>: <span style="color: #7CB8BB;">AV</span> = param.deref_av().expect(<span style="color: #CC9393;">"not an array ref"</span>);
-<span class="linenr"> 7: </span>        <span style="color: #F0DFAF; font-weight: bold;">let</span> <span style="color: #DFAF8F;">sum</span>: <span style="color: #7CB8BB;">NV</span> = array.iter()
-<span class="linenr"> 8: </span>            .map(|v| v.unwrap_or(0.0))
-<span class="linenr"> 9: </span>            .sum();
-<span class="linenr">10: </span>
-<span class="linenr">11: </span>
-<span class="linenr">12: </span>
-<span class="linenr">13: </span>        <span style="color: #94BFF3;">xs_return!</span>(ctx, sum);
-<span class="linenr">14: </span>    }
-<span class="linenr">15: </span>}
-</pre>
-</div>
 </section>
 </section>
 <section>
-<section id="slide-orgheadline27">
-<h2 id="orgheadline27">Benchmarks</h2>
+<section id="slide-orgheadline20">
+<h2 id="orgheadline20">Benchmarks</h2>
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 
@@ -534,34 +457,28 @@ map, code block, unwrap<sub>or</sub> == '//'
 <tbody>
 <tr>
 <td class="org-left">Perl</td>
-<td class="org-left">2.072s</td>
+<td class="org-left">1.003s</td>
 <td class="org-right">100%</td>
 </tr>
 
 <tr>
-<td class="org-left">Rust loop</td>
-<td class="org-left">0.691s</td>
-<td class="org-right">33%</td>
-</tr>
-
-<tr>
-<td class="org-left">Rust iter</td>
-<td class="org-left">0.690s</td>
-<td class="org-right">33%</td>
+<td class="org-left">Rust</td>
+<td class="org-left">0.645s</td>
+<td class="org-right">64%</td>
 </tr>
 
 <tr>
 <td class="org-left">XS</td>
-<td class="org-left">0.150s</td>
-<td class="org-right">7%</td>
+<td class="org-left">0.164s</td>
+<td class="org-right">16%</td>
 </tr>
 </tbody>
 </table>
 </section>
 </section>
 <section>
-<section id="slide-orgheadline31">
-<h2 id="orgheadline31">Why so slow?</h2>
+<section id="slide-orgheadline24">
+<h2 id="orgheadline24">Why so slow?</h2>
 <ul>
 <li class="fragment reveal">reference counting</li>
 <li class="fragment reveal">no hot path inlining</li>
@@ -569,8 +486,8 @@ map, code block, unwrap<sub>or</sub> == '//'
 
 </ul>
 </section>
-<section id="slide-orgheadline28">
-<h3 id="orgheadline28">exceptions</h3>
+<section id="slide-orgheadline21">
+<h3 id="orgheadline21">exceptions</h3>
 
 <div class="figure">
 <p><object type="image/svg+xml" data="xcpt-2.svg" >
@@ -584,8 +501,8 @@ destructors, automatically called code, reference counting
 
 </aside>
 </section>
-<section id="slide-orgheadline29">
-<h3 id="orgheadline29">exceptions</h3>
+<section id="slide-orgheadline22">
+<h3 id="orgheadline22">exceptions</h3>
 
 <div class="figure">
 <p><object type="image/svg+xml" data="xcpt-3.svg" >
@@ -599,8 +516,8 @@ what xs api croaks
 
 </aside>
 </section>
-<section id="slide-orgheadline30">
-<h3 id="orgheadline30">exceptions</h3>
+<section id="slide-orgheadline23">
+<h3 id="orgheadline23">exceptions</h3>
 
 <div class="figure">
 <p><object type="image/svg+xml" data="xcpt-4.svg" >
@@ -616,19 +533,8 @@ catch, unwind, resume
 </section>
 </section>
 <section>
-<section id="slide-orgheadline32">
-<h2 id="orgheadline32">Conclusion</h2>
-<ul>
-<li class="fragment reveal">it works</li>
-<li class="fragment reveal">it is safer</li>
-<li class="fragment reveal">it is slower</li>
-
-</ul>
-</section>
-</section>
-<section>
-<section id="slide-orgheadline33">
-<h2 id="orgheadline33">Thanks</h2>
+<section id="slide-orgheadline25">
+<h2 id="orgheadline25">Thanks</h2>
 <ul>
 <li>Booking.com</li>
 <li>p5pclub</li>
@@ -638,25 +544,21 @@ catch, unwind, resume
 </section>
 </section>
 <section>
-<section id="slide-orgheadline34">
-<h2 id="orgheadline34">FIN</h2>
+<section id="slide-orgheadline26">
+<h2 id="orgheadline26">FIN</h2>
 <div class="org-src-container">
 
-<pre  class="src src-rust"><span style="color: #94BFF3;">xs!</span> {
-    package <span style="color: #7CB8BB;">Array</span>::<span style="color: #7CB8BB;">Util</span>;
-
-    sub sum_array(ctx) {
-        <span style="color: #F0DFAF; font-weight: bold;">let</span> <span style="color: #DFAF8F;">param</span>: <span style="color: #7CB8BB;">SV</span> = ctx.st_fetch(0);
-        <span style="color: #F0DFAF; font-weight: bold;">let</span> <span style="color: #DFAF8F;">array</span>: <span style="color: #7CB8BB;">AV</span> = param.deref_av().expect(<span style="color: #CC9393;">"not an array ref"</span>);
-        <span style="color: #F0DFAF; font-weight: bold;">let</span> <span style="color: #F0DFAF; font-weight: bold;">mut</span> sum = 0.0;
-        <span style="color: #F0DFAF; font-weight: bold;">for</span> index <span style="color: #F0DFAF; font-weight: bold;">in</span> 0..array.top_index() + 1 {
-            <span style="color: #F0DFAF; font-weight: bold;">if</span> <span style="color: #F0DFAF; font-weight: bold;">let</span> <span style="color: #7CB8BB;">Some</span>(item) = array.fetch(index) {
-                sum += item;
-            }
-        }
-        <span style="color: #94BFF3;">xs_return!</span>(ctx, sum);
-    }
-}
+<pre  class="src src-rust"><span class="linenr"> 1: </span><span style="color: #94BFF3;">xs!</span> {
+<span class="linenr"> 2: </span>    package <span style="color: #7CB8BB;">Array</span>::<span style="color: #7CB8BB;">Util</span>;
+<span class="linenr"> 3: </span>
+<span class="linenr"> 4: </span>    sub sum_array(ctx, <span style="color: #DFAF8F;">array</span>: <span style="color: #7CB8BB;">AV</span>) {
+<span class="linenr"> 5: </span>        <span style="color: #F0DFAF; font-weight: bold;">let</span> <span style="color: #DFAF8F;">sum</span>: <span style="color: #7CB8BB;">NV</span> = array.iter()
+<span class="linenr"> 6: </span>            .map(|value| value.unwrap_or(0.0))
+<span class="linenr"> 7: </span>            .sum();
+<span class="linenr"> 8: </span>
+<span class="linenr"> 9: </span>        <span style="color: #94BFF3;">xs_return!</span>(ctx, sum);
+<span class="linenr">10: </span>    }
+<span class="linenr">11: </span>}
 </pre>
 </div>
 <p>
